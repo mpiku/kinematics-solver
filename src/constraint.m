@@ -12,6 +12,8 @@ classdef (Abstract) constraint < matlab.mixin.Heterogeneous
     methods (Abstract)
         getConstraint(obj);
         getJacobi(obj);
+        getGamma(obj);
+        getPhiPrim(obj);
     end
     
 end

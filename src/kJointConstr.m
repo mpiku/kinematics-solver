@@ -41,6 +41,13 @@ classdef kJointConstr < constraint
             % If one of the elements is the ground (element.index == 0), it
             % will not be added to Jacobi.
         end
+        function Gamma = getGamma(obj)
+            Gamma = rot( obj.el_A.fi_c ) * obj.s_A * ( obj.el_A.fi_c_prim^2 ) + ...
+                - rot( obj.el_B.fi_c ) * obj.s_B * ( obj.el_B.fi_c_prim^2 );
+        end
+        function Phi_prim = getPhiPrim(obj)
+            Phi_prim = zeros(2, 1);
+        end
     end
 end
 

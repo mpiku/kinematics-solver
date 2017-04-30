@@ -46,6 +46,22 @@ classdef solver < handle
                 q = [q; els_array(i).r_c; els_array(i).fi_c]; % #TODO Optimize for all methods!
             end
         end
+        function q = getQPrim(obj)
+            % Returns system's q'.
+            q = [];
+            els_array = obj.getElements();
+            for i=2:numel(els_array)
+                q = [q; els_array(i).r_c_prim; els_array(i).fi_c_prim];
+            end
+        end
+        function q = getQBis(obj)
+            % Returns system's q''.
+            q = [];
+            els_array = obj.getElements();
+            for i=2:numel(els_array)
+                q = [q; els_array(i).r_c_bis; els_array(i).fi_c_bis];
+            end
+        end
         function setQ(obj, q)
             % Distribute q among all elements.
             % Input:
@@ -55,6 +71,30 @@ classdef solver < handle
             for i=2:numel(els_array)
                 els_array(i).r_c = [q(q_i) q(q_i + 1)]';
                 els_array(i).fi_c = q(q_i + 2);
+                q_i = q_i + 3;
+            end
+        end
+        function setQPrim(obj, q)
+            % Distribute q' among all elements.
+            % Input:
+            %  * q - vector q'
+            els_array = obj.getElements();
+            q_i = 1;
+            for i=2:numel(els_array)
+                els_array(i).r_c_prim = [q(q_i) q(q_i + 1)]';
+                els_array(i).fi_c_prim = q(q_i + 2);
+                q_i = q_i + 3;
+            end
+        end
+        function setQBis(obj, q)
+            % Distribute q'' among all elements.
+            % Input:
+            %  * q - vector q''
+            els_array = obj.getElements();
+            q_i = 1;
+            for i=2:numel(els_array)
+                els_array(i).r_c_bis = [q(q_i) q(q_i + 1)]';
+                els_array(i).fi_c_bis = q(q_i + 2);
                 q_i = q_i + 3;
             end
         end
@@ -68,6 +108,14 @@ classdef solver < handle
                 Phi = [Phi; els_array(i).getPhi()];
             end
         end
+        function Phi_prim = getPhiPrim(obj)
+            % Returns system's Phi'
+            Phi_prim = [];
+            els_array = obj.getElements();
+            for i = 1:numel(els_array)
+                Phi_prim = [Phi_prim; els_array(i).getPhiPrim()];
+            end
+        end
         function Jacobi = getJacobi(obj)
             % Returns system's Jacobi
             Jacobi = [];
@@ -78,6 +126,18 @@ classdef solver < handle
                     % first it accesses an element and then iterate through
                     % all constraints of which the element is base element.
                     Jacobi = obj.conMatrices(Jacobi, els_array(i).vector_constraints(j).getJacobi());
+                end
+            end
+        end
+        function Gamma = getGamma(obj)
+            % Returns system's Gamma
+            Gamma = [];
+            els_array = obj.getElements();
+            for i=2:numel(els_array)
+                for j=1:numel(els_array(i).vector_constraints)
+                    % This function goes 2 levels deep - same as
+                    % obj.getJacobi().
+                    Gamma = [Gamma; els_array(i).vector_constraints(j).getGamma()];
                 end
             end
         end
@@ -119,21 +179,36 @@ classdef solver < handle
             for i=1:numel(timespan)
                 % Solve mechanism for single time
                 obj.time = timespan(i);
-                found_q = obj.nRaphson();
+                found_q = obj.nRaphson(); % Find q
+                
+                jacobi = obj.getJacobi();
+                phiphi = obj.getPhiPrim();
+                obj.setQPrim( -jacobi \ obj.getPhiPrim() ); % Find q'
+                obj.setQBis( jacobi \ obj.getGamma() ); % Find q''
+                
                 obj.saveSingleSolution();
             end
             disp(sprintf('ROZWI¥ZYWANIE: Zakoñczono rozwi¹zywanie.'));
         end
         
         % Post-processing functions
-        function solution_data = getSolution(obj)
+        function solution_data = getSolution(obj, option)
             % Returns solution from all elements in a big
             % matrix format with timespan as the header.
+            % Input:
+            %  * option - has default value - set it to 'q', 'qprim' or
+            %   'qbis' to narrow returned data respectively; if it is not
+            %   set then whole solution_data is returned.
+            
+            % Manage default value
             els_array = obj.getElements();
-            solution_data = [els_array(2).solution];
-            rows_number = size(solution_data, 1);
-            for i = 3:numel(els_array)
-                solution_data = [solution_data; els_array(i).solution(2:rows_number, :)];
+            solution_data = els_array(2).solution(1, :);       
+            if nargin ~= 2
+                option = '';
+            end
+            for i = 2:numel(els_array)
+                el_solution = els_array(i).getSolution( option );
+                solution_data = [solution_data; el_solution(2:size( el_solution, 1), :)];
             end
         end
         function animateSolution(obj, time_factor)
@@ -142,7 +217,7 @@ classdef solver < handle
             %  * time_factor - time factor of animation, e.g time_factor =
             %       1.25 => animation x 1.25 speed of real time
             if nargin == 1, time_factor = 1; end
-            animation_feed = obj.getSolution();
+            animation_feed = obj.getSolution('q');
             time_delay = (animation_feed(1, 2) - animation_feed(1, 1)) / time_factor;
             frames = size(animation_feed, 2);
             current_frame = 1;

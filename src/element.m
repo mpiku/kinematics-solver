@@ -6,8 +6,15 @@ classdef element < handle
     properties
         glob_indexer = indexer();
         index = 0;
+        
         r_c = zeros(2, 1);
         fi_c = 0;
+        
+        r_c_prim = zeros(2, 1);
+        fi_c_prim = 0;
+        
+        r_c_bis = zeros(2, 1);
+        fi_c_bis = 0;
         
         solution = []; % Keeps information about time, q, q', q'' in format:
                        % solution(1, :) = time, solution(2-3-4, :) = q etc.
@@ -170,6 +177,13 @@ classdef element < handle
                 Phi = [Phi; obj.vector_constraints(i).getConstraint()];
             end
         end
+        function Phi_prim = getPhiPrim(obj)
+            % Returns Phi' (n x 1) of the element
+            Phi_prim = [];
+            for i = 1:numel( obj.vector_constraints )
+                Phi_prim = [Phi_prim; obj.vector_constraints(i).getPhiPrim()];
+            end
+        end
         
         % Misc functions
         function drawElement(obj, color)
@@ -217,8 +231,29 @@ classdef element < handle
         end
         function saveSingleSolution(obj)
             % Saves data to obj.solution matrix
-            next_solution = [obj.solver.time; obj.r_c; obj.fi_c];
+            next_solution = [obj.solver.time; obj.r_c; obj.fi_c; ... % q
+                obj.r_c_prim; obj.fi_c_prim; ... % q'
+                obj.r_c_bis; obj.fi_c_bis]; % q''
             obj.solution = [obj.solution next_solution];
+        end
+        function solution = getSolution(obj, option)
+            % Returns solution in format of big matrix with timespan as
+            % header.
+            % Input:
+            %  * option - has default value - choose 'q', 'qprim' or 'qbis'
+            %   to return respective part of the solution. If nothing is
+            %   passed, returns whole solution.
+            rows_number = 2:10;
+            if nargin == 2
+                if strcmp(option, 'q')
+                    rows_number = 2:4;
+                elseif strcmp(option, 'qprim')
+                    rows_number = 5:7;
+                elseif strcmp(option, 'qbis')
+                    rows_number = 8:10;
+                end
+            end 
+            solution = [obj.solution(1, :); obj.solution(rows_number, :)];
         end
     end
     

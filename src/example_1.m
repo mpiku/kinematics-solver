@@ -25,8 +25,9 @@ el_1.add_K_JointConstr(el_2, B);
 el_2.add_K_JointConstr(el_3, C);
 el_3.add_K_PrismConstr(ground, C, D);
 
-% el_1.add_D_JointConstr(ground, A, @(t) t*pi/6, 0, 0); % Option 1
-el_3.add_D_PrismConstr(ground, C, D, @(t) (-sin(t*pi)+1)*6, 0, 0); % Option 2
+% el_1.add_D_JointConstr(ground, A, @(t) t*pi/6, @(t) pi/6, @(t) 0); % Option 1
+el_3.add_D_PrismConstr(ground, C, D, @(t) (-sin(t*pi)+1)*6, @(t) -6*pi*cos(t*pi), ...
+    @(t) 6*pi*pi*sin(t*pi)); % Option 2
 
 % Draw elements
 solver.drawMechanism();

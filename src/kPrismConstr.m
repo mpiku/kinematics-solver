@@ -50,6 +50,16 @@ classdef kPrismConstr < constraint
           j_i = [j_i_degree; j_i_transl]; j_j = [j_j_degree; j_j_transl];
           Jacobi = sign(obj.el_A.index)*j_i + sign(obj.el_B.index)*j_j; 
       end
+      function Gamma = getGamma(obj)
+          Gamma(1, 1) = 0;
+          Gamma(2, 1) = (rot( obj.el_B.fi_c ) * obj.v_B)' * ...
+              (2*obj.omega*( obj.el_B.r_c_prim - obj.el_A.r_c_prim )*obj.el_B.fi_c_prim + ...
+              ( obj.el_B.r_c - obj.el_A.r_c )*(obj.el_B.fi_c_prim^2) + ...
+              rot( obj.el_A.fi_c )*obj.s_A*( (obj.el_B.fi_c_prim - obj.el_A.fi_c_prim)^2 ));
+      end
+      function Phi_prim = getPhiPrim(obj)
+          Phi_prim = zeros(2, 1);
+      end
     end
     
 end

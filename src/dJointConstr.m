@@ -32,6 +32,12 @@ classdef dJointConstr < constraint
             
             Jacobi = sign(obj.el_A.index)*j_i_degree + sign(obj.el_B.index)*j_j_degree; 
         end
+        function Gamma = getGamma(obj)
+            Gamma = obj.f_bis( obj.el_A.solver.time );
+        end
+        function Phi_prim = getPhiPrim(obj)
+            Phi_prim = -obj.f_prim( obj.el_A.solver.time );
+        end
     end
     
 end
