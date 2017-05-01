@@ -175,14 +175,16 @@ classdef solver < handle
             if numel(timespan) == 2
                 timespan = [timespan(1):obj.default_time_resolution:timespan(2)];
             end
+            delta_time = timespan(2) - timespan(1);
             disp(sprintf('ROZWI¥ZYWANIE: Rozpoczêto rozwi¹zywanie (%d chwil)', numel(timespan)));
             for i=1:numel(timespan)
                 % Solve mechanism for single time
                 obj.time = timespan(i);
-                found_q = obj.nRaphson(); % Find q
+                q_0 = obj.getQ() + ( obj.getQPrim() + ...
+                    obj.getQBis()*delta_time/2 )*delta_time; % Predict q_0
+                found_q = obj.nRaphson( q_0 ); % Find q
                 
                 jacobi = obj.getJacobi();
-                phiphi = obj.getPhiPrim();
                 obj.setQPrim( -jacobi \ obj.getPhiPrim() ); % Find q'
                 obj.setQBis( jacobi \ obj.getGamma() ); % Find q''
                 
