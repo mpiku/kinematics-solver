@@ -86,7 +86,7 @@ classdef grapher < handle
             %   plot is created. If nothing is passed, then plot is created
             %   for center of the element.
             max_line_width = 10;
-            if nargin < 3
+            if nargin < 2
                 solution = element.getSolution();
             else
                 solution = element.getSolutionForPoint( point );
@@ -94,7 +94,9 @@ classdef grapher < handle
             point_x = solution(2, :);
             point_y = solution(3, :);
             point_vel = sqrt( solution( 5, :).^2 + solution( 6, : ).^2 );
-            line_width = ceil( max_line_width .* point_vel ./ (max( point_vel ) - min( point_vel ) ));
+            line_width = smooth( ( max_line_width .* ( ( point_vel - min( point_vel ) ) ...
+                ./ ( max( point_vel - min( point_vel ) ) ) ) ) + ...
+                ones( 1, size( point_vel, 2 ) ) );
             figure; % Create new figure
             for i=1:( numel(point_x) - 1)
                 line( point_x(i:i+1), point_y(i:i+1), 'LineWidth', line_width(i));

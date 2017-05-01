@@ -7,7 +7,7 @@ classdef solver < handle
         ground_element
         time = 0;
         
-        singularDetection_precision = 1e-15;
+        singularDetection_precision = 1e-3;
         nRaphson_precision = 1e-10;
         nRaphson_max_iter = 25;
         
@@ -158,7 +158,7 @@ classdef solver < handle
                 Jacobi = obj.getJacobi();
                 
                 if rcond(Jacobi) < obj.singularDetection_precision
-                    dips(fprintf('B£¥D NEWTON-RAPHSON: Wykryto osobliwoœæ uk³adu w %f s.', ...
+                    disp(sprintf('B£¥D NEWTON-RAPHSON: Wykryto osobliwoœæ uk³adu w %f s.', ...
                         obj.time));
                     obj.setQ( q0 );
                     exit_code = -1;
@@ -169,7 +169,7 @@ classdef solver < handle
                 iter = iter + 1;
             end
             if iter > 25
-                disp(fprintf('B£¥D NEWTON-RAPHSON: Po %d iteracjach nie uzyskano zbie¿noœci.', ...
+                disp(sprintf('B£¥D NEWTON-RAPHSON: Po %d iteracjach nie uzyskano zbie¿noœci.', ...
                     obj.nRaphson_max_iter));
                 obj.setQ( q0 );
                 exit_code = -2;
@@ -246,7 +246,6 @@ classdef solver < handle
                     % so that it does not overwrite other figures in case
                     % the animation figure is closed.
             obj.drawMechanism(); obj.eraseMechanism(); % Make sure figure window is on
-            axis( obj.findAnimationBoundaries()); axis manual;
             
             disp('ANIMACJA: Proszê wcisn¹æ Ctrl+C, aby zakoñczyæ.');          
             while true
@@ -304,6 +303,7 @@ classdef solver < handle
             end
         end
         function boundaries = findAnimationBoundaries(obj)
+            % DEPRECATED!
             % Finds boundaries in which animation of given solution
             % should be drawn.
             els_array = obj.getElements();
