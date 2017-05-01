@@ -7,6 +7,7 @@ classdef solver < handle
         ground_element
         time = 0;
         
+        singularDetection_precision = 1e-15;
         nRaphson_precision = 1e-10;
         nRaphson_max_iter = 25;
         
@@ -143,7 +144,7 @@ classdef solver < handle
         end
         
         % Solving functions
-        function q = nRaphson(obj, q0)
+        function exit_code = nRaphson(obj, q0)
             % Solves mechanism with NR method.
             % Input:
             %  * q0 - has default value - if it is not set, then elements 
@@ -154,16 +155,27 @@ classdef solver < handle
             iter = 1; % counter
             while( (norm(Phi) > obj.nRaphson_precision) && (iter < obj.nRaphson_max_iter) )
                 Phi = obj.getPhi();
-                obj.setQ(obj.getQ() - obj.getJacobi()\Phi);
-                iter = iter + 1;
+                Jacobi = obj.getJacobi();
                 
+                if rcond(Jacobi) < obj.singularDetection_precision
+                    dips(fprintf('B£¥D NEWTON-RAPHSON: Wykryto osobliwoœæ uk³adu w %f s.', ...
+                        obj.time));
+                    obj.setQ( q0 );
+                    exit_code = -1;
+                    return;
+                end
+                
+                obj.setQ(obj.getQ() - Jacobi\Phi);
+                iter = iter + 1;
             end
             if iter > 25
                 disp(fprintf('B£¥D NEWTON-RAPHSON: Po %d iteracjach nie uzyskano zbie¿noœci.', ...
                     obj.nRaphson_max_iter));
                 obj.setQ( q0 );
+                exit_code = -2;
+                return;
             end
-            q = obj.getQ(); % return result q (if someone really need it as return)
+            exit_code = 1;
         end
         function solve(obj, timespan)
             % Main function for finding solution of mechanism in
@@ -182,7 +194,11 @@ classdef solver < handle
                 obj.time = timespan(i);
                 q_0 = obj.getQ() + ( obj.getQPrim() + ...
                     obj.getQBis()*delta_time/2 )*delta_time; % Predict q_0
-                found_q = obj.nRaphson( q_0 ); % Find q
+                nRaphson_status = obj.nRaphson( q_0 ); % Find q
+                if nRaphson_status < 0
+                    disp(sprintf('ROZWI¥ZYWANIE: Zakoñczono niepowodzeniem'));
+                    return;
+                end
                 
                 jacobi = obj.getJacobi();
                 obj.setQPrim( -jacobi \ obj.getPhiPrim() ); % Find q'
