@@ -224,6 +224,9 @@ classdef solver < handle
             number_of_qs = 3*numel(obj.getElements) - 3;
             
             % Set axis limits
+            figure; % Creates new figure for animation #TODO Lock animation
+                    % so that it does not overwrite other figures in case
+                    % the animation figure is closed.
             obj.drawMechanism(); obj.eraseMechanism(); % Make sure figure window is on
             axis( obj.findAnimationBoundaries()); axis manual;
             

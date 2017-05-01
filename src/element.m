@@ -236,15 +236,19 @@ classdef element < handle
                 obj.r_c_bis; obj.fi_c_bis]; % q''
             obj.solution = [obj.solution next_solution];
         end
-        function solution = getSolution(obj, option)
+        function solution = getSolution(obj, option, point)
             % Returns solution in format of big matrix with timespan as
             % header.
             % Input:
             %  * option - has default value - choose 'q', 'qprim' or 'qbis'
             %   to return respective part of the solution. If nothing is
-            %   passed, returns whole solution.
+            %   passed, returns whole solution. It's more like trimming
+            %   received data than optimization.
+            %  * point - has default value - returns solution for point of
+            %   the elemenet given the point coordinates are provided in
+            %   global coords system in time 0.
             rows_number = 2:10;
-            if nargin == 2
+            if nargin > 1
                 if strcmp(option, 'q')
                     rows_number = 2:4;
                 elseif strcmp(option, 'qprim')
@@ -252,8 +256,36 @@ classdef element < handle
                 elseif strcmp(option, 'qbis')
                     rows_number = 8:10;
                 end
-            end 
-            solution = [obj.solution(1, :); obj.solution(rows_number, :)];
+            end
+            if nargin < 3
+                solution = [obj.solution(1, :); obj.solution(rows_number, :)];
+            else
+                temp = obj.getSolutionForPoint( point );
+                solution = [obj.solution(1, :); temp(rows_number, :)];
+            end
+        end
+        function solution = getSolutionForPoint( obj, point )
+            % Returns whole solution matrix calculated for given point in
+            % the element.
+            % Input:
+            %  * point - has default value -  point of the elemenet given
+            %   the point coordinates are provided in global coords system
+            %   in time 0.
+            s = point - obj.solution(2:3, 1);
+            time_steps = size( obj.solution, 2 );
+            solution = obj.solution(1, 1:time_steps);
+            omega = [0 -1; 1 0];
+            for i=1:time_steps
+                solution(2:3, i) = obj.solution(2:3, i) + rot(obj.solution(4, i))*s;
+                solution(4, i) = obj.solution(4, i);
+                solution(5:6, i) = obj.solution(5:6, i) + ...
+                    omega*rot(obj.solution(4, i))*s*obj.solution(7, i);
+                solution(7, i) = obj.solution(7, i);
+                solution(8:9, i) = obj.solution(8:9, i) + ...
+                     omega*rot(obj.solution(4, i))*s*obj.solution(10, i) + ...
+                     - rot(obj.solution(4, i))*s*( obj.solution(7, i)^2 );
+                solution(10, i) = obj.solution(10, i);
+            end
         end
     end
     

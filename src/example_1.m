@@ -34,4 +34,9 @@ solver.drawMechanism();
 
 % Solve mechanism
 solver.solve([0:0.05:1]);
+
+% Create plots
+figure; grapher.plot(el_1, 'x'); grapher.addPlot(el_1, 'x', B);
+
+% Additional functions
 % solver.animateSolution(); % Comment out for animation auto-play
