@@ -18,7 +18,7 @@ classdef solver < handle
         function obj = solver()
             % Constructor
             % Memory cleanup
-            cleaner_el = element( [0 0] );
+            cleaner_el = kinSolver.element( [0 0] );
             for i=1:(numel(cleaner_el.glob_indexer.elements_array) - 1)
                 delete(cleaner_el.glob_indexer.elements_array(i));
             end
@@ -26,7 +26,7 @@ classdef solver < handle
             clear cleaner_el; clear element;
             
             % Create ground
-            obj.ground_element = element( [0 0] );
+            obj.ground_element = kinSolver.element( [0 0] );
         end
         function ground = getGround(obj)
             % Returns ground element reference (handle)

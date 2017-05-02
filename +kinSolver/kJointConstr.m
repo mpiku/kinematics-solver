@@ -1,4 +1,4 @@
-classdef kJointConstr < constraint
+classdef kJointConstr < kinSolver.constraint
     %KJOINTCONSTR Joint constraint - kindematic constraint
     % Implementation of joint constraint (pol. para obrotowa wiêz
     % kinematyczny).
@@ -25,15 +25,15 @@ classdef kJointConstr < constraint
             obj.s_B = cell2mat( el_B.cell_points( B_i ) );
         end
         function Phi = getConstraint(obj)
-            Phi = obj.el_A.r_c + rot( obj.el_A.fi_c ) * obj.s_A + ...
-                - ( obj.el_B.r_c + rot( obj.el_B.fi_c ) * obj.s_B );
+            Phi = obj.el_A.r_c + kinSolver.rot( obj.el_A.fi_c ) * obj.s_A + ...
+                - ( obj.el_B.r_c + kinSolver.rot( obj.el_B.fi_c ) * obj.s_B );
         end
         function Jacobi = getJacobi(obj)
             j_i = [zeros(2, 3*(obj.el_A.index - 1)) eye(2) ...
-                obj.omega * rot( obj.el_A.fi_c ) * obj.s_A ...
+                obj.omega * kinSolver.rot( obj.el_A.fi_c ) * obj.s_A ...
                 zeros(2, 3*( obj.el_B.index - obj.el_A.index - (-sign(obj.el_A.index) + 1)))];
             j_j = [zeros(2, 3*(obj.el_B.index  - 1)) -eye(2) ...
-                -obj.omega * rot( obj.el_B.fi_c ) * obj.s_B ...
+                -obj.omega * kinSolver.rot( obj.el_B.fi_c ) * obj.s_B ...
                 zeros(2, 3*( obj.el_A.index - obj.el_B.index - (-sign(obj.el_B.index) + 1)))];
             % sign() function is needed to turn off extending matrices for
             % ground element.
@@ -42,8 +42,8 @@ classdef kJointConstr < constraint
             % will not be added to Jacobi.
         end
         function Gamma = getGamma(obj)
-            Gamma = rot( obj.el_A.fi_c ) * obj.s_A * ( obj.el_A.fi_c_prim^2 ) + ...
-                - rot( obj.el_B.fi_c ) * obj.s_B * ( obj.el_B.fi_c_prim^2 );
+            Gamma = kinSolver.rot( obj.el_A.fi_c ) * obj.s_A * ( obj.el_A.fi_c_prim^2 ) + ...
+                - kinSolver.rot( obj.el_B.fi_c ) * obj.s_B * ( obj.el_B.fi_c_prim^2 );
         end
         function Phi_prim = getPhiPrim(obj)
             Phi_prim = zeros(2, 1);

@@ -4,7 +4,7 @@ classdef element < handle
     %   in absolute coordinates approach.
     
     properties
-        glob_indexer = indexer();
+        glob_indexer = kinSolver.indexer();
         index = 0;
         
         r_c = zeros(2, 1);
@@ -72,7 +72,7 @@ classdef element < handle
                 return
             end
             obj.vector_constraints = [ obj.vector_constraints ...
-                kJointConstr(obj, my_point_index, element, element_point_index) ];
+                kinSolver.kJointConstr(obj, my_point_index, element, element_point_index) ];
             disp( sprintf('DODANO WIÊZ: Para obrotowa(%d, %d)', ...
                 obj.index, element.index) );
         end
@@ -96,10 +96,10 @@ classdef element < handle
             end
             % Find v_B element
             v_AB = point_B - point_A;
-            v_B = rot(element.fi_c)' * [v_AB(2) -v_AB(1)]';
+            v_B = kinSolver.rot(element.fi_c)' * [v_AB(2) -v_AB(1)]';
             % Push to obj.vector_constraints
             obj.vector_constraints = [ obj.vector_constraints ...
-                kPrismConstr(obj, my_point_A_index, element, element_point_B_index, v_B) ];
+                kinSolver.kPrismConstr(obj, my_point_A_index, element, element_point_B_index, v_B) ];
             disp( sprintf('DODANO WIÊZ: Para postêpowa(%d, %d)', ...
                 obj.index, element.index) );
         end
@@ -128,7 +128,7 @@ classdef element < handle
                 return
             end
             obj.vector_constraints = [ obj.vector_constraints ...
-                dJointConstr(obj, element, f, f_prim, f_bis) ];
+                kinSolver.dJointConstr(obj, element, f, f_prim, f_bis) ];
             disp( sprintf('DODANO WIÊZ: Para obrotowa - kieruj¹cy(%d, %d)', ...
                 obj.index, element.index) );
         end
@@ -159,12 +159,12 @@ classdef element < handle
                 obj.index, element.index) );
                 return
             end
-            u_B= rot( element.fi_c ) * ( ( point_B - point_A ) / norm( point_B - point_A ) );
+            u_B= kinSolver.rot( element.fi_c ) * ( ( point_B - point_A ) / norm( point_B - point_A ) );
             my_point_A_index = obj.whichIndex( point_A );
             element_point_B_index = element.whichIndex( point_B );
             % Push to obj.vector_constraints
             obj.vector_constraints = [ obj.vector_constraints ...
-                dPrismConstr(obj, my_point_A_index, element, element_point_B_index, u_B, f, f_prim, f_bis) ];
+                kinSolver.dPrismConstr(obj, my_point_A_index, element, element_point_B_index, u_B, f, f_prim, f_bis) ];
             disp( sprintf('DODANO WIÊZ: Para postêpowa - kieruj¹cy(%d, %d)', ...
                 obj.index, element.index) );
         end
@@ -198,13 +198,13 @@ classdef element < handle
             end
             for i=1:size(obj.cell_points, 2)
                 % #TODO Might be written better.
-                global_point = obj.r_c + rot(obj.fi_c) * cell2mat( obj.cell_points(i) );
+                global_point = obj.r_c + kinSolver.rot(obj.fi_c) * cell2mat( obj.cell_points(i) );
                 line([obj.r_c(1) global_point(1)], [obj.r_c(2) global_point(2)], ...
                     'Color', element_color);
             end
             p_loc = cell2mat( obj.cell_points );
             boundary_indices = boundary( p_loc(1, :)', p_loc(2, :)' );
-            p_glob = rot( obj.fi_c ) * p_loc + obj.r_c * ones(1, numel(p_loc) / 2);
+            p_glob = kinSolver.rot( obj.fi_c ) * p_loc + obj.r_c * ones(1, numel(p_loc) / 2);
             line( p_glob(1, boundary_indices), p_glob(2, boundary_indices), ...
                     'Color', element_color, 'LineWidth', 3);
         end
@@ -276,14 +276,14 @@ classdef element < handle
             solution = obj.solution(1, 1:time_steps);
             omega = [0 -1; 1 0];
             for i=1:time_steps
-                solution(2:3, i) = obj.solution(2:3, i) + rot(obj.solution(4, i))*s;
+                solution(2:3, i) = obj.solution(2:3, i) + kinSolver.rot(obj.solution(4, i))*s;
                 solution(4, i) = obj.solution(4, i);
                 solution(5:6, i) = obj.solution(5:6, i) + ...
-                    omega*rot(obj.solution(4, i))*s*obj.solution(7, i);
+                    omega*kinSolver.rot(obj.solution(4, i))*s*obj.solution(7, i);
                 solution(7, i) = obj.solution(7, i);
                 solution(8:9, i) = obj.solution(8:9, i) + ...
-                     omega*rot(obj.solution(4, i))*s*obj.solution(10, i) + ...
-                     - rot(obj.solution(4, i))*s*( obj.solution(7, i)^2 );
+                     omega*kinSolver.rot(obj.solution(4, i))*s*obj.solution(10, i) + ...
+                     - kinSolver.rot(obj.solution(4, i))*s*( obj.solution(7, i)^2 );
                 solution(10, i) = obj.solution(10, i);
             end
         end

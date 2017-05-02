@@ -1,4 +1,4 @@
-classdef dJointConstr < constraint
+classdef dJointConstr < kinSolver.constraint
     %DJOINTCONSTR Joint constraint - driving constraint
     % Implementation of joint constraint (pol. para obrotowa wiêŸ
     % kieruj¹cy).

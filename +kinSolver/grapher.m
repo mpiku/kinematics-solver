@@ -56,7 +56,7 @@ classdef grapher < handle
                 end
             end
             my_plot = plot(x, y);
-            grapher.defaultLook( my_plot );
+            kinSolver.grapher.defaultLook( my_plot );
             xlabel('t [s]'); ylabel(y_legend);
         end
         function addPlot( element, option, point )
@@ -69,11 +69,11 @@ classdef grapher < handle
             %   for center of the element.
             hold on;
             if nargin < 3
-                grapher.plot( element, option );
+                kinSolver.grapher.plot( element, option );
             else
-                grapher.plot( element, option, point);
+                kinSolver.grapher.plot( element, option, point);
             end
-            grapher.defaultLook();
+            kinSolver.grapher.defaultLook();
             hold off;
         end
         function trajectory( element, point )
@@ -101,7 +101,7 @@ classdef grapher < handle
             for i=1:( numel(point_x) - 1)
                 line( point_x(i:i+1), point_y(i:i+1), 'LineWidth', line_width(i));
             end
-            grapher.defaultLook();
+            kinSolver.grapher.defaultLook();
             xlabel('x [m]'); ylabel('y [m]');
         end
     end
