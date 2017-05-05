@@ -27,6 +27,7 @@ classdef element < handle
                                  % information about constraints which this
                                  % element constitue but not as a base
                                  % element, e.g. vector_of_known_constr
+       vector_lines = [];
                                  
        % Software archictecture properties
        solver = struct('time', 0); % Reference to the solver which is known
@@ -199,21 +200,20 @@ classdef element < handle
             for i=1:size(obj.cell_points, 2)
                 % #TODO Might be written better.
                 global_point = obj.r_c + kinSolver.rot(obj.fi_c) * cell2mat( obj.cell_points(i) );
-                line([obj.r_c(1) global_point(1)], [obj.r_c(2) global_point(2)], ...
-                    'Color', element_color);
+                obj.vector_lines = [ obj.vector_lines line([obj.r_c(1) global_point(1)], [obj.r_c(2) global_point(2)], ...
+                    'Color', element_color)];
             end
             p_loc = cell2mat( obj.cell_points );
             boundary_indices = boundary( p_loc(1, :)', p_loc(2, :)' );
             p_glob = kinSolver.rot( obj.fi_c ) * p_loc + obj.r_c * ones(1, numel(p_loc) / 2);
-            line( p_glob(1, boundary_indices), p_glob(2, boundary_indices), ...
-                    'Color', element_color, 'LineWidth', 3);
+            obj.vector_lines = [ obj.vector_lines line( p_glob(1, boundary_indices), p_glob(2, boundary_indices), ...
+                    'Color', element_color, 'LineWidth', 3) ];
         end
         function eraseElement(obj)
-            % Erases element from the drawing by drawing
-            % the same element with white color - clever, huh?
-            % #TODO Not really.. it is suboptimal - it adds new lines to
-            % the plot with each call of obj.eraseElement().
-            obj.drawElement('w');
+            % Erases element from the current drawing.
+            delete(obj.vector_lines);
+            clear obj.vector_lines;
+            obj.vector_lines = [];
         end
         function ind = whichIndex(obj, point)
             % Returns index of given point in cell array of local points

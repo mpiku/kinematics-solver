@@ -245,13 +245,13 @@ classdef solver < handle
             figure; % Creates new figure for animation #TODO Lock animation
                     % so that it does not overwrite other figures in case
                     % the animation figure is closed.
-            obj.drawMechanism(); obj.eraseMechanism(); % Make sure figure window is on
-            
+            obj.drawMechanism('on'); obj.eraseMechanism(); % Make sure figure window is on
+            grid on; axis equal; axis manual; axis(obj.findAnimationBoundaries);
             disp('ANIMACJA: Proszê wcisn¹æ Ctrl+C, aby zakoñczyæ.');          
             while true
                 obj.eraseMechanism();
                 obj.setQ(animation_feed(2:(number_of_qs + 1), current_frame));
-                obj.drawMechanism();
+                obj.drawMechanism('on');
                 current_frame = current_frame + 1;
                 pause( time_delay );
                 if current_frame > frames, current_frame = 1; end
@@ -259,13 +259,19 @@ classdef solver < handle
         end
         
         % Misc functions
-        function drawMechanism(obj)
+        function drawMechanism(obj, animation)
             % Draws mechanism but for the ground element.
+            % Input:
+            %  * animation - has default value - if set to 'on' function
+            %   avoid setting axis to equal so that animation figure is not
+            %   resized on each call of obj.drawMechanism().
             els_array = obj.getElements();
             for i = 2:numel(els_array)
                 els_array(i).drawElement();
             end
-            axis equal; grid on; % Just make axis ratio = 1 and turn on grid
+            if nargin ~= 2 || ~strcmp(animation, 'on')
+                axis equal; grid on; % Just make axis ratio = 1 and turn on grid
+            end
         end
         function eraseMechanism(obj)
             % Erase mechanism but for the ground element.
@@ -303,9 +309,9 @@ classdef solver < handle
             end
         end
         function boundaries = findAnimationBoundaries(obj)
-            % DEPRECATED!
             % Finds boundaries in which animation of given solution
             % should be drawn.
+            % #TODO Implement more precise way of finding boundaries
             els_array = obj.getElements();
             max_x = -inf; max_y = -inf;
             min_x = inf; min_y = inf;
