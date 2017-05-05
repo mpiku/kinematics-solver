@@ -194,7 +194,7 @@ classdef element < handle
             color_arr = ['m' 'y' 'c' 'r' 'g' 'b' 'k'];
             if nargin == 2, element_color = color;
             else
-                element_color = color_arr(mod(obj.index, 8) + 1);
+                element_color = color_arr(mod(obj.index, 7) + 1);
             end
             for i=1:size(obj.cell_points, 2)
                 % #TODO Might be written better.
