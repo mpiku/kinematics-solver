@@ -7,6 +7,9 @@ classdef element < handle
         glob_indexer = kinSolver.indexer();
         index = 0;
         
+        r_c_build = zeros(2, 1); % Keeps r_c used for building the element.
+                                 % It is used later for indetifying whether
+                                 % passed point belongs to the element.
         r_c = zeros(2, 1);
         fi_c = 0;
         
@@ -42,6 +45,7 @@ classdef element < handle
             %    * point - point being a center of gracity for the element
             obj.index = obj.glob_indexer.nextObj( obj );
             obj.r_c = [point(1) point(2)]';
+            obj.r_c_build = obj.r_c;
         end
         function delete( obj )
             % Destructor removes references (handles) to the object
@@ -52,7 +56,7 @@ classdef element < handle
             %   Adds point to cell array of element's points
             %   (obj.cell_points).
             point = [point(1) point(2)]';
-            local_point = point - obj.r_c;
+            local_point = point - obj.r_c_build;
             obj.cell_points = [ obj.cell_points local_point ];
         end
         
@@ -221,7 +225,7 @@ classdef element < handle
             % Input:
             %  * point - point index of which is to be found
             ind = -1;
-            local_point = point - obj.r_c;
+            local_point = point - obj.r_c_build;
             for i=1:size( obj.cell_points, 2)
                 if cell2mat(obj.cell_points(i)) == local_point
                     ind = i;
@@ -268,10 +272,14 @@ classdef element < handle
             % Returns whole solution matrix calculated for given point in
             % the element.
             % Input:
-            %  * point - has default value -  point of the elemenet given
-            %   the point coordinates are provided in global coords system
-            %   in time 0.
-            s = point - obj.solution(2:3, 1);
+            %  * point - has default value -  point given in global
+            %   coordinate system for mechanism in initial stage. If
+            %   nothing is passed, solution for center of mass will be
+            %   returned.
+            if nargin < 2, s = [0 0]';
+            else
+                s = point - obj.r_c_build;
+            end
             time_steps = size( obj.solution, 2 );
             solution = obj.solution(1, 1:time_steps);
             omega = [0 -1; 1 0];

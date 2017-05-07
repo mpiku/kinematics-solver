@@ -1,10 +1,10 @@
 % #------------------------------------------------------------------------
-% EXAMPLE_2
+% EXAMPLE_3
 % Another example with more complex mechanism
 % #------------------------------------------------------------------------
 clear; clear kinSolver.element; clear kinSolver.indexer; % Workspace cleanup (additional clears just in case)
 
-% Build points mech
+% Build points mesh
 A=[-1 .2]';B=[-.7 .8]';D=[-.2 .5]';E=[.1 .8]';F=[.9 .7]';G=[.3 .6]';
 H=[.7 -.4]';I=[.7 .3]';J=[0 .9]';K=[-1.2 .6]';L=[.6 .3]';M=[.2 .6]';N=[.4 -.2]';
 C1=[-.95 .55]';C2=[.4 .75]';C3=[.6 .5]';C4=[-.15 .35]';C5=[-.35 .85]';

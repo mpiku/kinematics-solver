@@ -38,8 +38,8 @@ classdef grapher < handle
             simple_options = {'x' 'y' 'fi' 'xprim' 'yprim' 'fiprim' ...
                 'xbis' 'ybis' 'fibis'};
             y_legend_options = {'x [m]' 'y [m]' 'fi [rad]' 'x'' [m/s]' ...
-                'y'' [m/s]' 'fi'' [rad/s]' 'x'''' [m^{2}/s]' ...
-                'y'''' [m^{2}/s]' 'fi'''' [rad^{2}/s]'};
+                'y'' [m/s]' 'fi'' [rad/s]' 'x'''' [m/s^{2}]' ...
+                'y'''' [m/s^{2}]' 'fi'''' [rad/s^{2}]'};
             index = find(strcmp(simple_options, option), 1);
             if ~isempty(index)
                 y = solution(index + 1, :);
@@ -47,7 +47,7 @@ classdef grapher < handle
             else
                 % Look for more complicated options
                 extra_option = {'r' 'rprim' 'rbis'};
-                y_legend_options = {'r [m]' 'v [m/s]' 'a [m^{3}/s]'};
+                y_legend_options = {'r [m]' 'v [m/s]' 'a [m/s^{2}]'};
                 index = find(strcmp(extra_option, option), 1);
                 if ~isempty(index)
                     y_legend = strjoin(y_legend_options(index));
