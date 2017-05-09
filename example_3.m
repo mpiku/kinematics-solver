@@ -42,11 +42,11 @@ el_9.add_K_PrismConstr(el_10, G, H);
 el_10.add_K_JointConstr(ground, H);
 
 % Define driving constraints
-l_7 = norm(M-N)-.2; a_7 = .2; omega_7 = 1; fi_7 = 0;
+l_7 = norm(M-N); a_7 = .02; omega_7 = 1; fi_7 = 0;
 el_7.add_D_PrismConstr(el_8, M, N, @(t) l_7 + a_7*sin(omega_7*t + fi_7), ...
     @(t) a_7*omega_7*cos(omega_7*t + fi_7), ...
     @(t) -a_7*omega_7*omega_7*sin(omega_7*t + fi_7));
-l_9 = norm(G-H)-.2; a_9 = -.2; omega_9 = 2; fi_9 = 0;
+l_9 = norm(G-H); a_9 = -.02; omega_9 = 2; fi_9 = 0;
 el_9.add_D_PrismConstr(el_10, G, H, @(t) l_9 + a_9*sin(omega_9*t + fi_9), ...
     @(t) a_9*omega_9*cos(omega_9*t + fi_9), ...
     @(t) -a_9*omega_9*omega_9*sin(omega_9*t + fi_9));
