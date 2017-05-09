@@ -152,11 +152,9 @@ classdef solver < handle
             if nargin == 2, obj.setQ( q0 ); else q0 = obj.getQ(); end
             
             Phi = obj.getPhi();
+            Jacobi = obj.getJacobi();
             iter = 1; % counter
             while( (norm(Phi) > obj.nRaphson_precision) && (iter < obj.nRaphson_max_iter) )
-                Phi = obj.getPhi();
-                Jacobi = obj.getJacobi();
-                
                 if rcond(Jacobi) < obj.singularDetection_precision
                     disp(sprintf('B£¥D NEWTON-RAPHSON: Wykryto osobliwoœæ uk³adu w %f s.', ...
                         obj.time));
@@ -167,6 +165,9 @@ classdef solver < handle
                 
                 obj.setQ(obj.getQ() - Jacobi\Phi);
                 iter = iter + 1;
+                
+                Phi = obj.getPhi();
+                Jacobi = obj.getJacobi();
             end
             if iter > 25
                 disp(sprintf('B£¥D NEWTON-RAPHSON: Po %d iteracjach nie uzyskano zbie¿noœci.', ...
